@@ -33,7 +33,8 @@ function notifyUser(message) {
 
 async function syncQuotes() {
     await fetchQuotesFromServer();
-    setTimeout(syncQuotes, 30000);
 }
+
+setInterval(syncQuotes, 30000);
 
 document.addEventListener("DOMContentLoaded", syncQuotes);
