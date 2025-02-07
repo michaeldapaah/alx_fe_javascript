@@ -44,7 +44,6 @@ function saveQuotes() {
  */
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
-  
   // Clear existing options and add the default "All Categories" option.
   categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
   
@@ -250,22 +249,44 @@ function showNotification(message) {
 }
 
 /**
- * syncWithServer()
- * Simulates syncing local quote data with a server.
- * Uses JSONPlaceholder as a mock API to fetch server data.
- * Conflict Resolution: If the fetched data differs from local data, the server's data takes precedence.
+ * fetchQuotesFromServer()
+ * Simulates fetching quote data from a server using a mock API.
+ * Uses JSONPlaceholder to fetch posts and maps them to quote objects.
  */
-function syncWithServer() {
-  fetch("https://jsonplaceholder.typicode.com/posts")
+function fetchQuotesFromServer() {
+  return fetch("https://jsonplaceholder.typicode.com/posts")
     .then(response => response.json())
-    .then(serverData => {
-      // Simulate conversion: take the first 3 posts as server quotes.
-      // For demonstration, we use the post title as the quote text and a fixed category "Server".
-      const serverQuotes = serverData.slice(0, 3).map(item => {
+    .then(data => {
+      // For simulation, convert the first 3 posts into our quote format.
+      return data.slice(0, 3).map(item => {
         return { text: item.title, category: "Server" };
       });
-      
-      // Simple conflict resolution: if server data differs, update local quotes.
+    });
+}
+
+/**
+ * postQuotesToServer(quotesToPost)
+ * Simulates posting local quotes data to a server using a mock API.
+ */
+function postQuotesToServer(quotesToPost) {
+  return fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quotesToPost)
+  })
+    .then(response => response.json());
+}
+
+/**
+ * syncQuotes()
+ * Fetches quotes from the server and checks for conflicts.
+ * If the server data differs from the local quotes, the local storage is updated
+ * with the server data (server takes precedence) and a notification is shown.
+ */
+function syncQuotes() {
+  fetchQuotesFromServer()
+    .then(serverQuotes => {
+      // Simple conflict resolution: if server data differs, update local data.
       if (JSON.stringify(serverQuotes) !== JSON.stringify(quotes)) {
         quotes = serverQuotes;
         saveQuotes();
@@ -273,22 +294,22 @@ function syncWithServer() {
         filterQuotes();
         showNotification("Data synced with server. Server data took precedence over local changes.");
       } else {
-        showNotification("Data is already up-to-date with the server.");
+        showNotification("Local data is up-to-date with the server.");
       }
     })
     .catch(error => {
-      console.error("Error syncing with server:", error);
-      showNotification("Error syncing with server: " + error.message);
+      console.error("Error fetching quotes from server:", error);
+      showNotification("Error fetching quotes from server: " + error.message);
     });
 }
 
 // Periodically sync data with the server every 30 seconds.
-setInterval(syncWithServer, 30000);
+setInterval(syncQuotes, 30000);
 
 // Optional: If you have a manual "Sync Now" button in your HTML (with id="syncButton"), attach an event listener.
 const syncButton = document.getElementById("syncButton");
 if (syncButton) {
-  syncButton.addEventListener("click", syncWithServer);
+  syncButton.addEventListener("click", syncQuotes);
 }
 
 // ------------------------
