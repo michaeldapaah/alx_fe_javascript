@@ -1,35 +1,51 @@
+
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Dynamic Quote Generator</title>
-    </head>
-    <body>
-      <h1>Dynamic Quote Generator</h1>
-      
-      <!-- Area to display the current quote -->
-      <div id="quoteDisplay"></div>
-      <!-- Button to show a new random quote -->
-      <button id="newQuote">Show New Quote</button>
-      
-      <!-- Area to optionally display session-specific information (e.g., last viewed quote) -->
-      <div id="sessionInfo"></div>
-      
-      <!-- Form to add a new quote -->
-      <div>
-        <h2>Add a New Quote</h2>
-        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-        <button id="addQuoteBtn">Add Quote</button>
-      </div>
-      
-      <!-- Export and Import JSON -->
-      <div>
-        <button id="exportQuotes">Export Quotes as JSON</button>
-        <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-      </div>
-      
-      <script src="script.js"></script>
-    </body>
-    </html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Quote Generator</title>
+  <style>
+    /* Optional basic styling */
+    .quoteItem {
+      border: 1px solid #ccc;
+      margin: 0.5em 0;
+      padding: 0.5em;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dynamic Quote Generator</h1>
+  
+  <!-- Dropdown for category filtering -->
+  <label for="categoryFilter"><strong>Filter by Category:</strong></label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+    <!-- Additional options will be populated dynamically -->
+  </select>
+  
+  <!-- Display area for quotes -->
+  <div id="quoteDisplay"></div>
+  
+  <!-- Button to show a random quote (from current filtered set) -->
+  <button id="newQuote">Show New Quote</button>
+  
+  <!-- Form to add a new quote -->
+  <div>
+    <h2>Add a New Quote</h2>
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button id="addQuoteBtn">Add Quote</button>
+  </div>
+  
+  <!-- JSON Export and Import -->
+  <div>
+    <button id="exportQuotes">Export Quotes as JSON</button>
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+  </div>
+  
+  <!-- Link to JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
