@@ -112,7 +112,6 @@ function showRandomQuote() {
   const categoryFilter = document.getElementById("categoryFilter");
   const selectedCategory = categoryFilter.value;
   
-  // Choose from either all quotes or the filtered list.
   let availableQuotes = (selectedCategory === "all") ?
     quotes :
     quotes.filter(q => q.category === selectedCategory);
@@ -127,7 +126,6 @@ function showRandomQuote() {
   const randomIndex = Math.floor(Math.random() * availableQuotes.length);
   const quote = availableQuotes[randomIndex];
   
-  // Display the randomly selected quote.
   quoteDisplay.innerHTML = `<div class="quoteItem">
                               <p>"${quote.text}"</p>
                               <p><em>Category: ${quote.category}</em></p>
@@ -154,15 +152,12 @@ function addQuote() {
     return;
   }
   
-  // Add the new quote.
   quotes.push({ text: newText, category: newCategory });
   saveQuotes();
   
-  // Clear the input fields.
   quoteTextInput.value = "";
   quoteCategoryInput.value = "";
   
-  // Update the category filter dropdown and refresh displayed quotes.
   populateCategories();
   filterQuotes();
 }
@@ -200,12 +195,10 @@ function importFromJsonFile(event) {
         throw new Error("Invalid file format: expected an array of quotes.");
       }
       
-      // Merge imported quotes into the existing array.
       quotes.push(...importedQuotes);
       saveQuotes();
       alert("Quotes imported successfully!");
       
-      // Update the categories and refresh the display.
       populateCategories();
       filterQuotes();
     } catch (error) {
@@ -227,10 +220,8 @@ function importFromJsonFile(event) {
 function showNotification(message) {
   let notificationElement = document.getElementById("notification");
   if (!notificationElement) {
-    // Create a notification element if it doesn't exist.
     notificationElement = document.createElement("div");
     notificationElement.id = "notification";
-    // Basic styling for the notification element.
     notificationElement.style.position = "fixed";
     notificationElement.style.bottom = "10px";
     notificationElement.style.right = "10px";
@@ -242,8 +233,7 @@ function showNotification(message) {
   }
   notificationElement.textContent = message;
   
-  // Clear the notification after 5 seconds.
-  setTimeout(() => {
+  setTimeout(function() {
     notificationElement.textContent = "";
   }, 5000);
 }
@@ -255,10 +245,12 @@ function showNotification(message) {
  */
 function fetchQuotesFromServer() {
   return fetch("https://jsonplaceholder.typicode.com/posts")
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
       // For simulation, convert the first 3 posts into our quote format.
-      return data.slice(0, 3).map(item => {
+      return data.slice(0, 3).map(function(item) {
         return { text: item.title, category: "Server" };
       });
     });
@@ -274,30 +266,31 @@ function postQuotesToServer(quotesToPost) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(quotesToPost)
   })
-    .then(response => response.json());
+  .then(function(response) {
+    return response.json();
+  });
 }
 
 /**
  * syncQuotes()
  * Fetches quotes from the server and checks for conflicts.
- * If the server data differs from the local quotes, the local storage is updated
- * with the server data (server takes precedence) and a notification is shown.
+ * If the server data differs from the local quotes, updates local storage (server wins),
+ * repopulates the UI, and notifies the user.
  */
 function syncQuotes() {
   fetchQuotesFromServer()
-    .then(serverQuotes => {
-      // Simple conflict resolution: if server data differs, update local data.
+    .then(function(serverQuotes) {
       if (JSON.stringify(serverQuotes) !== JSON.stringify(quotes)) {
         quotes = serverQuotes;
         saveQuotes();
         populateCategories();
         filterQuotes();
-        showNotification("Data synced with server. Server data took precedence over local changes.");
+        showNotification("Data synced with server. Server data took precedence.");
       } else {
         showNotification("Local data is up-to-date with the server.");
       }
     })
-    .catch(error => {
+    .catch(function(error) {
       console.error("Error fetching quotes from server:", error);
       showNotification("Error fetching quotes from server: " + error.message);
     });
@@ -307,7 +300,7 @@ function syncQuotes() {
 setInterval(syncQuotes, 30000);
 
 // Optional: If you have a manual "Sync Now" button in your HTML (with id="syncButton"), attach an event listener.
-const syncButton = document.getElementById("syncButton");
+var syncButton = document.getElementById("syncButton");
 if (syncButton) {
   syncButton.addEventListener("click", syncQuotes);
 }
