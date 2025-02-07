@@ -217,10 +217,85 @@ function importFromJsonFile(event) {
 }
 
 // ------------------------
+// SERVER SYNC & CONFLICT RESOLUTION FUNCTIONS
+// ------------------------
+
+/**
+ * showNotification(message)
+ * Displays a message to the user in a notification element.
+ * If the element doesn't exist, it is created and styled.
+ */
+function showNotification(message) {
+  let notificationElement = document.getElementById("notification");
+  if (!notificationElement) {
+    // Create a notification element if it doesn't exist.
+    notificationElement = document.createElement("div");
+    notificationElement.id = "notification";
+    // Basic styling for the notification element.
+    notificationElement.style.position = "fixed";
+    notificationElement.style.bottom = "10px";
+    notificationElement.style.right = "10px";
+    notificationElement.style.backgroundColor = "#f8d7da";
+    notificationElement.style.padding = "10px";
+    notificationElement.style.border = "1px solid #f5c6cb";
+    notificationElement.style.borderRadius = "5px";
+    document.body.appendChild(notificationElement);
+  }
+  notificationElement.textContent = message;
+  
+  // Clear the notification after 5 seconds.
+  setTimeout(() => {
+    notificationElement.textContent = "";
+  }, 5000);
+}
+
+/**
+ * syncWithServer()
+ * Simulates syncing local quote data with a server.
+ * Uses JSONPlaceholder as a mock API to fetch server data.
+ * Conflict Resolution: If the fetched data differs from local data, the server's data takes precedence.
+ */
+function syncWithServer() {
+  fetch("https://jsonplaceholder.typicode.com/posts")
+    .then(response => response.json())
+    .then(serverData => {
+      // Simulate conversion: take the first 3 posts as server quotes.
+      // For demonstration, we use the post title as the quote text and a fixed category "Server".
+      const serverQuotes = serverData.slice(0, 3).map(item => {
+        return { text: item.title, category: "Server" };
+      });
+      
+      // Simple conflict resolution: if server data differs, update local quotes.
+      if (JSON.stringify(serverQuotes) !== JSON.stringify(quotes)) {
+        quotes = serverQuotes;
+        saveQuotes();
+        populateCategories();
+        filterQuotes();
+        showNotification("Data synced with server. Server data took precedence over local changes.");
+      } else {
+        showNotification("Data is already up-to-date with the server.");
+      }
+    })
+    .catch(error => {
+      console.error("Error syncing with server:", error);
+      showNotification("Error syncing with server: " + error.message);
+    });
+}
+
+// Periodically sync data with the server every 30 seconds.
+setInterval(syncWithServer, 30000);
+
+// Optional: If you have a manual "Sync Now" button in your HTML (with id="syncButton"), attach an event listener.
+const syncButton = document.getElementById("syncButton");
+if (syncButton) {
+  syncButton.addEventListener("click", syncWithServer);
+}
+
+// ------------------------
 // INITIALIZATION & EVENT LISTENERS
 // ------------------------
 
-// Populate the category filter dropdown and restore last selected category on page load.
+// Populate the category filter dropdown and restore the last selected category on page load.
 populateCategories();
 
 // Apply the current filter (or default to all) on page load.
