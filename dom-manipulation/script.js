@@ -40,10 +40,11 @@ function saveQuotes() {
 /**
  * populateCategories()
  * Extracts unique categories from the quotes array and populates the filter dropdown.
- * Restores the last selected category filter from local storage if available.
+ * Also restores the last selected category from local storage when the page loads.
  */
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
+  
   // Clear existing options and add the default "All Categories" option.
   categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
   
@@ -51,6 +52,7 @@ function populateCategories() {
   const categories = new Set();
   quotes.forEach(quote => categories.add(quote.category));
   
+  // Populate the dropdown with unique categories.
   categories.forEach(category => {
     const option = document.createElement("option");
     option.value = category;
@@ -58,7 +60,7 @@ function populateCategories() {
     categoryFilter.appendChild(option);
   });
   
-  // Restore the last selected filter if it exists.
+  // Restore the last selected filter from local storage (if available).
   const savedFilter = localStorage.getItem(filterStorageKey);
   if (savedFilter) {
     categoryFilter.value = savedFilter;
@@ -68,7 +70,7 @@ function populateCategories() {
 /**
  * filterQuotes()
  * Filters and displays quotes based on the selected category.
- * Also saves the current filter selection to local storage.
+ * Saves the current filter selection to local storage.
  */
 function filterQuotes() {
   const categoryFilter = document.getElementById("categoryFilter");
@@ -77,7 +79,7 @@ function filterQuotes() {
   // Save the selected category in local storage.
   localStorage.setItem(filterStorageKey, selectedCategory);
   
-  // Determine the quotes to display.
+  // Determine which quotes to display.
   let quotesToDisplay;
   if (selectedCategory === "all") {
     quotesToDisplay = quotes;
@@ -85,19 +87,19 @@ function filterQuotes() {
     quotesToDisplay = quotes.filter(q => q.category === selectedCategory);
   }
   
-  // Update the display.
+  // Update the display using the Array.map method.
   const quoteDisplay = document.getElementById("quoteDisplay");
   if (quotesToDisplay.length === 0) {
     quoteDisplay.innerHTML = "<p>No quotes available for the selected category.</p>";
   } else {
-    // Display all matching quotes.
-    let html = "";
-    quotesToDisplay.forEach(quote => {
-      html += `<div class="quoteItem">
-                <p>"${quote.text}"</p>
-                <p><em>Category: ${quote.category}</em></p>
-              </div>`;
-    });
+    const html = quotesToDisplay
+      .map(quote => {
+        return `<div class="quoteItem">
+                  <p>"${quote.text}"</p>
+                  <p><em>Category: ${quote.category}</em></p>
+                </div>`;
+      })
+      .join("");
     quoteDisplay.innerHTML = html;
   }
 }
@@ -132,14 +134,14 @@ function showRandomQuote() {
                               <p><em>Category: ${quote.category}</em></p>
                             </div>`;
   
-  // Save this quote in session storage (optional session data).
+  // Optionally, save this quote in session storage.
   sessionStorage.setItem("lastViewedQuote", JSON.stringify(quote));
 }
 
 /**
  * addQuote()
  * Retrieves input values, creates a new quote object, adds it to the quotes array,
- * updates local storage, repopulates categories, and refreshes the display.
+ * updates local storage, repopulates categories, and refreshes the displayed quotes.
  */
 function addQuote() {
   const quoteTextInput = document.getElementById("newQuoteText");
@@ -161,7 +163,7 @@ function addQuote() {
   quoteTextInput.value = "";
   quoteCategoryInput.value = "";
   
-  // Update the filter dropdown and refresh displayed quotes.
+  // Update the category filter dropdown and refresh displayed quotes.
   populateCategories();
   filterQuotes();
 }
@@ -188,7 +190,7 @@ function exportQuotes() {
 /**
  * importFromJsonFile(event)
  * Reads a JSON file, parses its content, merges the imported quotes with the existing array,
- * updates local storage, repopulates the categories, and notifies the user.
+ * updates local storage, repopulates categories, and notifies the user.
  */
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
@@ -218,7 +220,7 @@ function importFromJsonFile(event) {
 // INITIALIZATION & EVENT LISTENERS
 // ------------------------
 
-// Populate the category filter dropdown on load.
+// Populate the category filter dropdown and restore last selected category on page load.
 populateCategories();
 
 // Apply the current filter (or default to all) on page load.
